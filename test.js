@@ -1,11 +1,25 @@
 'use strict';
-const seventeen = require('./index.js');
-const assert = require('node:assert');
+const pug = require('pug');
 const test = require('node:test');
+const assert = require('node:assert');
 
-test('isMultipleOfSeventeenのテスト', () => {
-  const a = [83, 32, 85, 47, 77, 8, 61, 74, 29, 34, 11, 76, 60, 99, 55, 7, 19, 60, 98, 38, 28, 96, 32];
-  assert.deepStrictEqual(a.filter(seventeen.isMultipleOfSeventeen), [85, 34]);
+test('チャットメッセージに含まれる HTML タグがエスケープされる', () => {
+  const html = pug.renderFile(
+    './views/posts.pug',
+    {
+      posts: [
+        {
+          id: 1,
+          content: '<script>alert("XSS!");</script>',
+          postedBy: 'test_user',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+      ],
+      user: 'test_user',
+    },
+  );
+
+  // メッセージの <script> タグがエスケープされていることをチェック
+  assert(html.includes('&lt;script&gt;alert(&quot;XSS!&quot;);&lt;/script&gt;'));
 });
-
-console.log('テストが正常に完了しました');
